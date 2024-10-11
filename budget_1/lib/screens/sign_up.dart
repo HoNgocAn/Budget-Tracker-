@@ -11,7 +11,9 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final _userNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -31,6 +33,9 @@ class _SignUpViewState extends State<SignUpView> {
         "email": _emailController.text,
         "phone": _phoneController.text,
         "password": _passwordController.text,
+        "remainingAmount" : 0,
+        "totalCredit": 0,
+        "totalDebit": 0
       };
 
       try {
@@ -46,13 +51,6 @@ class _SignUpViewState extends State<SignUpView> {
             const SnackBar(
               content: Text('User created successfully!'),
               backgroundColor: Colors.green,
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('An error occurred, please try again!'),
-              backgroundColor: Colors.red,
             ),
           );
         }
@@ -102,7 +100,6 @@ class _SignUpViewState extends State<SignUpView> {
               TextFormField(
                 controller: _userNameController,
                 style: const TextStyle(color: Colors.white),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration("UserName", Icons.person),
                 validator: appValidator.validateUser,
               ),
@@ -111,7 +108,6 @@ class _SignUpViewState extends State<SignUpView> {
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.emailAddress,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration("Email", Icons.email),
                 validator: appValidator.validateEmail,
               ),
@@ -120,7 +116,6 @@ class _SignUpViewState extends State<SignUpView> {
                 controller: _phoneController,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.phone,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration("PhoneNumber", Icons.call),
                 validator: appValidator.validatePhoneNumber,
               ),
@@ -128,7 +123,6 @@ class _SignUpViewState extends State<SignUpView> {
               TextFormField(
                 controller: _passwordController,
                 style: const TextStyle(color: Colors.white),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration("Password", Icons.password),
                 validator: appValidator.validatePassword,
                 obscureText: true,
@@ -147,7 +141,7 @@ class _SignUpViewState extends State<SignUpView> {
                     textStyle: const TextStyle(fontSize: 24),
                   ),
                   child: isLoader
-                    ? const Center(child: CircularProgressIndicator(),)
+                    ? const Center(child: CircularProgressIndicator())
                     : const Text("Create"),
                 ),
               ),
@@ -156,7 +150,7 @@ class _SignUpViewState extends State<SignUpView> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => LoginView()),
+                    MaterialPageRoute(builder: (context) => const LoginView()),
                   );
                 },
                 child: const Text(

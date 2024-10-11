@@ -1,16 +1,64 @@
+import 'package:budget_tracker/screens/dashboard.dart';
 import 'package:budget_tracker/screens/sign_up.dart';
 import 'package:budget_tracker/utils/appvalidator.dart';
 import 'package:flutter/material.dart';
 
-class LoginView extends StatelessWidget {
-  LoginView({super.key});
+import '../services/auth_service.dart';
+
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+
+class _LoginViewState extends State<LoginView> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _submitForm() {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  var authService = AuthService();
+  var isLoader = false;
+
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(_formKey.currentContext!).showSnackBar(
-          const SnackBar(content: Text("Form submitted successfully")));
+      setState(() {
+        isLoader = true;  // Bắt đầu hiển thị loader
+      });
+
+      var data = {
+        "email": _emailController.text,
+        "password": _passwordController.text,
+      };
+
+      try {
+        bool isSuccess = await authService.loginUser(data, context);
+
+        if (isSuccess) {
+          await Future.delayed(const Duration(seconds: 1));
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        // Handle any exceptions here
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoader = false; // Ẩn loader sau khi hoàn tất
+        });
+      }
     }
   }
 
@@ -41,6 +89,7 @@ class LoginView extends StatelessWidget {
                 ),
                 const SizedBox(height: 50.0),
                 TextFormField(
+                  controller: _emailController,
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.emailAddress,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -49,6 +98,7 @@ class LoginView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
+                  controller: _passwordController,
                   style: const TextStyle(color: Colors.white),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   decoration: _buildInputDecoration("Password", Icons.password),
@@ -60,14 +110,19 @@ class LoginView extends StatelessWidget {
                   height: 50,
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _submitForm,
+                    onPressed: isLoader ? null : () {
+                      _submitForm();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF15900), // Màu nền của nút
                       foregroundColor: Colors.white, // Màu chữ (foreground)
-                      textStyle:
-                      const TextStyle(fontSize: 18), // Kích thước chữ
+                      textStyle: const TextStyle(fontSize: 18), // Kích thước chữ
                     ),
-                    child: const Text("Login"),
+                    child: isLoader
+                        ? const Center(child: CircularProgressIndicator())
+                        : const Text("Login",
+                      style: TextStyle(color: Colors.white, fontSize: 25),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20.0),
@@ -75,11 +130,11 @@ class LoginView extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=> SignUpView()));
+                          MaterialPageRoute(builder: (context)=> const SignUpView()));
                     },
                     child: const Text(
                       "Create New Account",
-                      style: TextStyle(color: Color(0xFFF15900), fontSize: 25),
+                      style: TextStyle(color: Color(0xFFF15900), fontSize: 22),
                     )),
               ],
             )),
